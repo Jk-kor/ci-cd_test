@@ -26,7 +26,7 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies
-        run: npm ci # package-lock.json 기반으로 깔끔하게 설치
+        run: npm install # package-lock.json 기반으로 깔끔하게 설치
 
       - name: Run Linter
         run: npm run lint # package.json에 정의된 스크립트 실행
