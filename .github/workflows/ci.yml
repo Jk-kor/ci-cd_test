@@ -1,6 +1,6 @@
 name: CI Pipeline
 
-# 1. 트리거 설정
+# 1. 트리거 설정h
 on:
   push:
     branches: [ "main" ]
