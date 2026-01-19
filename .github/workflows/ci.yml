@@ -1,19 +1,19 @@
-name: CI Pipeline # 워크플로우 이름
+name: CI Pipeline
 
-# 1. 트리거 설정 (Push & Pull Request)
+# 1. 트리거 설정
 on:
   push:
-    branches: [ "main" ] # main 브랜치에 푸시될 때
+    branches: [ "main" ]
   pull_request:
-    branches: [ "main" ] # main으로 PR이 올 때
+    branches: [ "main" ]
 
-# GITHUB_TOKEN 권한 설정 (GHCR 푸시를 위해 필요)
+# 권한 설정
 permissions:
   contents: read
   packages: write
 
 jobs:
-  # 2. 린팅 (Linting) - 코드 스타일 검사
+  # 2. 린팅
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -26,14 +26,14 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies
-        run: npm install # package-lock.json 기반으로 깔끔하게 설치
+        run: npm install # 수정됨!
 
       - name: Run Linter
-        run: npm run lint # package.json에 정의된 스크립트 실행
+        run: npm run lint
 
-  # 3. 테스트 (Testing)
+  # 3. 테스트
   test:
-    needs: lint # 린트가 통과해야 테스트를 진행 (선택 사항, 병렬로 하려면 제거)
+    needs: lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -45,22 +45,20 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies
-        run: npm install
+        run: npm install # 수정됨!
 
       - name: Run Tests
         run: npm test
 
-  # 4. 도커 빌드 및 푸시 (Docker Build & Push)
+  # 4. 도커 빌드 및 푸시
   build-and-push:
-    needs: test # 테스트가 통과해야만 이미지를 만듦
-    # 조건부 실행: 'main' 브랜치에서만 실행 (PR에서는 빌드 안 함)
+    needs: test
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # GHCR(GitHub Container Registry) 로그인
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -68,17 +66,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # 도커 이미지 메타데이터 추출 (태그 자동 생성 등)
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository }}
+          # 중요: 여기에 변수 대신 소문자로 직접 적었습니다 (J -> j)
+          images: ghcr.io/jk-kor/ci-cd_test
           tags: |
-            type=sha  # 커밋 해시로 태그 생성 (예: sha-1234567)
-            latest    # latest 태그 추가
+            type=sha
+            latest
 
-      # 이미지 빌드 및 푸시
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
